@@ -2,6 +2,13 @@ import React from 'react';
 import { X, Eye, MapPin, DollarSign, Clock, Calendar, Users, Star, Wifi } from 'lucide-react';
 
 const StreamModal = ({ stream, onClose }) => {
+  const [showShare, setShowShare] = React.useState(false);
+  const shareUrl = stream.youtubeUrl || window.location.href;
+  const shareText = `Check out this livestream: ${stream.title}`;
+  const handleCopy = () => {
+    navigator.clipboard.writeText(shareUrl);
+    alert('Livestream link copied to clipboard!');
+  };
   const handleBooking = () => {
     alert(`Booking ${stream.title} for $${stream.price} - This would integrate with a booking system!`);
   };
@@ -11,18 +18,30 @@ const StreamModal = ({ stream, onClose }) => {
       <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="relative">
-          <img
-            src={stream.thumbnail}
-            alt={stream.title}
-            className="w-full h-64 object-cover rounded-t-2xl"
-          />
+          {stream.youtubeUrl ? (
+            <iframe
+              src={stream.youtubeUrl}
+              title={stream.title}
+              width="100%"
+              height="320"
+              className="w-full h-80 object-cover rounded-t-2xl"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          ) : (
+            <img
+              src={stream.thumbnail}
+              alt={stream.title}
+              className="w-full h-64 object-cover rounded-t-2xl"
+            />
+          )}
           <button
             onClick={onClose}
             className="absolute top-4 right-4 bg-black/60 text-white p-2 rounded-full hover:bg-black/80 transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
-          
           {/* Live Badge */}
           {stream.isLive && (
             <div className="absolute top-4 left-4 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
@@ -110,7 +129,10 @@ const StreamModal = ({ stream, onClose }) => {
 
           {/* Action Buttons */}
           <div className="flex gap-4">
-            <button className="flex-1 bg-slate-100 text-slate-700 py-3 rounded-full font-medium hover:bg-slate-200 transition-colors">
+            <button
+              className="flex-1 bg-slate-100 text-slate-700 py-3 rounded-full font-medium hover:bg-slate-200 transition-colors"
+              onClick={() => setShowShare(!showShare)}
+            >
               Share Stream
             </button>
             <button className="flex-1 bg-slate-100 text-slate-700 py-3 rounded-full font-medium hover:bg-slate-200 transition-colors">
@@ -122,6 +144,51 @@ const StreamModal = ({ stream, onClose }) => {
               </button>
             )}
           </div>
+
+          {/* Share Dialog */}
+          {showShare && (
+            <div className="mt-6 p-4 bg-slate-50 rounded-xl shadow border border-slate-200 flex flex-col gap-3 items-center">
+              <div className="font-semibold text-slate-700 mb-2">Share this livestream:</div>
+              <div className="flex gap-4">
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-green-500 text-white px-4 py-2 rounded-full font-medium hover:bg-green-600 transition"
+                >
+                  WhatsApp
+                </a>
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 transition"
+                >
+                  Twitter
+                </a>
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-700 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-800 transition"
+                >
+                  Facebook
+                </a>
+                <button
+                  onClick={handleCopy}
+                  className="bg-slate-300 text-slate-800 px-4 py-2 rounded-full font-medium hover:bg-slate-400 transition"
+                >
+                  Copy Link
+                </button>
+              </div>
+              <button
+                className="mt-2 px-6 py-2 bg-emerald-600 text-white rounded-full font-semibold hover:bg-emerald-700 transition"
+                onClick={() => setShowShare(false)}
+              >
+                Close
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
